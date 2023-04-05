@@ -8,13 +8,16 @@ use EasyGithDev\PHPOpenAI\Helpers\ImageResponseEnum;
 use EasyGithDev\PHPOpenAI\Helpers\ImageSizeEnum;
 use EasyGithDev\PHPOpenAI\OpenAIClient;
 
-$error =  [
-    'error' => ['message' => '', 'type' => '', 'param' => '', 'code' => ''],
-];
+
 $prompt = filter_input(INPUT_POST, 'prompt', FILTER_SANITIZE_SPECIAL_CHARS);
 $inumber = filter_input(INPUT_POST, 'inumber', FILTER_VALIDATE_INT);
 $isize = filter_input(INPUT_POST, 'isize', FILTER_SANITIZE_SPECIAL_CHARS);
 $painter = filter_input(INPUT_POST, 'painter', FILTER_SANITIZE_SPECIAL_CHARS);
+$debug = filter_input(INPUT_POST, 'debug', FILTER_VALIDATE_BOOL);
+
+$error =  [
+    'error' => ['message' => '', 'type' => '', 'param' => '', 'code' => ''],
+];
 
 if (empty($prompt)) {
     $error['error']['message'] = 'Prompt is required';
@@ -44,11 +47,16 @@ $responseArray = [
     'output' => []
 ];
 
+if ($debug) {
+    $responseArray['output'][] = 'https://www.php.net/images/logos/php-logo-bigger.png';
+    echo json_encode($responseArray);
+    die;
+}
+
+$images = [];
 $apiKey = getenv('OPENAI_API_KEY');
 $client = new OpenAIClient($apiKey);
 try {
-
-    $images = [];
     $imageHandler = $client->Image();
     $response = $imageHandler->create(
         $prompt,
