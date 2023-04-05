@@ -7,7 +7,7 @@
     <!-- Ajout des fichiers CSS de Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <!-- Ajout des fichiers CSS personnalisés -->
-    <link rel="stylesheet" href="style.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
 </head>
 
 <body>
@@ -19,7 +19,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav">
+                <!-- <ul class="navbar-nav">
                     <li class="nav-item active">
                         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                     </li>
@@ -29,7 +29,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="#">Disabled</a>
                     </li>
-                </ul>
+                </ul> -->
             </div>
         </nav>
     </header>
@@ -38,55 +38,44 @@
     <main>
         <div class="container-fluid">
             <div class="row">
-                <div class="col-md-6">
-                    <!-- Input Box -->
-                    <div class="form-group">
-                        <label for="prompt">Prompt:</label>
-                        <textarea class="form-control" id="prompt" rows="8"></textarea>
-                    </div>
+                <div class="col-md-8">
 
-                    <!-- Run Button -->
-                    <button id="run" type="button" class="btn btn-primary">Run</button>
-
-                    <!-- Output Box -->
-                    <div class="form-group">
-                        <label for="outputBox">Output:</label>
-                        <!-- <textarea class="form-control" id="outputBox" rows="8" readonly></textarea> -->
-                        <div id="outputBox">
+                    <!-- output section -->
+                    <div class="card" style="margin-top: 10px;">
+                        <div class="card-header">
+                            Outputs
+                        </div>
+                        <div class="card-body" id="outputBox">
 
                         </div>
                     </div>
+
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+
+                    <!-- Input -->
+                    <div class="card" style="margin-top: 10px;">
+                        <div class="card-header">
+                            Inputs
+                        </div>
+                        <div class="card-body">
+                            <!-- Input Box -->
+                            <div class="form-group">
+                                <label for="prompt">Prompt:</label>
+                                <textarea class="form-control" id="prompt" rows="5"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Settings -->
-                    <div class="card" style="margin-top: 31px;">
+                    <div class="card" style="margin-top: 5px;">
                         <div class="card-header">
                             Settings
                         </div>
                         <div class="card-body">
-                            <!-- Language Selector -->
-                            <div class="form-group">
-                                <label for="inumber">Number of frames:</label>
-                                <select class="form-control" id="inumber">
-                                    <option value="1">1</option>
-                                    <option value="2">2</option>
-                                    <option value="3">3</option>
-                                    <option value="4">4</option>
-                                </select>
-                            </div>
-
-                            <!-- Model Selector -->
-                            <div class="form-group">
-                                <label for="isize">Image size:</label>
-                                <select class="form-control" id="isize">
-                                    <option value="256x256">256x256</option>
-                                    <option value="512x512">512x512</option>
-                                    <option value="1024x1024">1024x1024</option>
-                                </select>
-                            </div>
-
-                            <!-- Parameters -->
+                            
+                            <!-- Painters -->
                             <div class="form-group">
                                 <label for="painter">Painter:</label>
                                 <select class="form-control" id="painter">
@@ -189,16 +178,50 @@
                                 </select>
 
                             </div>
+
+                            <!-- Frames Selector -->
+                            <div class="form-group">
+                                <label for="inumber">Number of frames:</label>
+                                <select class="form-control" id="inumber">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                </select>
+                            </div>
+
+                            <!-- Size Selector -->
+                            <div class="form-group">
+                                <label for="isize">Image size:</label>
+                                <select class="form-control" id="isize">
+                                    <option value="256x256">256x256</option>
+                                    <option value="512x512">512x512</option>
+                                    <option value="1024x1024">1024x1024</option>
+                                </select>
+                            </div>
+
                         </div>
+                    </div>
+
+                    <!-- Run Button -->
+                    <div style="margin-top: 5px;">
+                        <button id="run" class="btn btn-primary btn-block" type="button" enabled>
+                            Run
+                        </button>
                     </div>
                 </div>
             </div>
+
+
+
+
+
         </div>
     </main>
 
     <!-- Footer -->
     <footer>
-        <p>Copyright © OpenAI</p>
+        <p></p>
     </footer>
 
     <!-- Ajout des fichiers JavaScript de Bootstrap -->
@@ -207,11 +230,15 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <!-- Ajout du fichier JavaScript personnalisé -->
-    <script src="script.js"></script>
+    <!-- <script src="script.js"></script> -->
     <script>
         $(document).ready(function() {
             // Lorsque le bouton de soumission est cliqué
             $("#run").click(function() {
+
+                $("#run").prop('disabled', true);
+                $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+
                 // Récupérer les valeurs des champs de formulaire
                 var inumber = $("#inumber").val();
                 var isize = $("#isize").val();
@@ -227,13 +254,14 @@
                 }, function(jsonData) {
                     // Gérer la réponse de la requête
                     console.log(jsonData);
-                    // const data = JSON.parse(jsonData);
 
-                    jsonData.images.forEach((val) => {
+                    jsonData.output.forEach((val) => {
                         console.log(val);
                         const imgSrc = val;
                         const imgAlt = "Description de l'image";
-                        const img = $("<img>").attr("src", imgSrc).attr("alt", imgAlt);
+                        const img = $("<img>").attr("src", imgSrc).attr("alt", imgAlt).addClass('img-thumbnail');
+                        // const thumbnail = $("<div>").addClass("thumbnail").append(img);
+
                         // .addClass("card-img-top");
 
                         // const card = '<div class="card">'+img+
@@ -243,6 +271,9 @@
                         // '</div>';
 
                         $("#outputBox").append(img);
+                        $("#run").html('Run');
+                        $("#run").prop('disabled', false);
+
                     });
                 });
             });

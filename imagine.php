@@ -3,66 +3,73 @@ header('Content-Type: application/json');
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+use EasyGithDev\PHPOpenAI\Exceptions\ApiException;
 use EasyGithDev\PHPOpenAI\Helpers\ImageResponseEnum;
 use EasyGithDev\PHPOpenAI\Helpers\ImageSizeEnum;
-use EasyGithDev\PHPOpenAI\Helpers\ModelEnum;
 use EasyGithDev\PHPOpenAI\OpenAIClient;
 
-
+$error =  [
+    'error' => ['message' => '', 'type' => '', 'param' => '', 'code' => ''],
+];
 $prompt = filter_input(INPUT_POST, 'prompt', FILTER_SANITIZE_SPECIAL_CHARS);
 $inumber = filter_input(INPUT_POST, 'inumber', FILTER_VALIDATE_INT);
 $isize = filter_input(INPUT_POST, 'isize', FILTER_SANITIZE_SPECIAL_CHARS);
 $painter = filter_input(INPUT_POST, 'painter', FILTER_SANITIZE_SPECIAL_CHARS);
 
-$isize = ImageSizeEnum::from($isize);
-$rformat = ImageResponseEnum::URL;
-$prompt .= " by $painter";
+if (empty($prompt)) {
+    $error['error']['message'] = 'Prompt is required';
+    echo json_encode($error);
+    die;
+}
 
-$painters = [
-    'Wassily Kandinsky',
-    // 'Henri Matisse',
-    // 'Joan Miró',
-    // 'Pablo Picasso'
+if ($inumber < 1 || $inumber > 4) {
+    $error['error']['message'] = 'Number of frames is between 1 and 4';
+    echo json_encode($error);
+    die;
+}
+
+$isize = ImageSizeEnum::tryFrom($isize) ?? ImageSizeEnum::is256;
+$rformat = ImageResponseEnum::URL;
+$by = empty($painter) ? '' : " by $painter";
+$prompt .= $by;
+
+$responseArray = [
+    'input' =>
+    [
+        'prompt' => $prompt,
+        'isize' => $isize,
+        'rformat' => $rformat,
+        'painter' => $painter
+    ],
+    'output' => []
 ];
 
 $apiKey = getenv('OPENAI_API_KEY');
 $client = new OpenAIClient($apiKey);
 try {
 
-    // $response = $client
-    //     ->Completion()
-    //     ->create(
-    //         ModelEnum::TEXT_DAVINCI_003,
-    //         prompt: $prompt,
-    //         temperature: 0.7,
-    //         max_tokens: 100,
-    //         top_p: 1.0,
-    //         frequency_penalty: 0.0,
-    //         presence_penalty: 1
-    //     )
-    //     ->toObject();
-
-    // $summary = $response->choices[0]->text;
-    $summary = $prompt;
     $images = [];
     $imageHandler = $client->Image();
-    foreach ($painters as $painter) {
-        $response = $imageHandler->create(
-            $prompt,
-            n: $inumber,
-            size: $isize,
-            response_format: $rformat
-        )->toObject();
+    $response = $imageHandler->create(
+        $prompt,
+        n: $inumber,
+        size: $isize,
+        response_format: $rformat
+    )->toObject();
 
-        foreach ($response->data as $image) {
-            $images['images'][] = $image->url;
-        }
-
-        // $images[$painter][] = $image->url;
+    foreach ($response->data as $image) {
+        $images[] = $image->url;
     }
+} catch (ApiException $e) {
+    $error['error']['message'] = $e->getMessage();
+    echo json_encode($error);
+    die;
 } catch (Throwable $t) {
-    echo nl2br($t->getMessage());
+    $error['error']['message'] = $t->getMessage();
+    echo json_encode($error);
     die;
 }
 
-echo json_encode($images);
+$responseArray['output'] = $images;
+
+echo json_encode($responseArray);
