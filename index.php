@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>DALL·E 2 Playground</title>
+    <title>PHPOpenAI Playground</title>
     <!-- Ajout des fichiers CSS de Bootstrap -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,7 +15,7 @@
     <!-- Header -->
     <header>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            <a class="navbar-brand" href="#">DALL·E Playground by PHPOpenAI</a>
+            <a class="navbar-brand" href="#">PHPOpenAI Playground</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -242,6 +242,7 @@
     <!-- <script src="script.js"></script> -->
     <script>
         async function downloadContent(url) {
+            console.log(url);
             try {
                 let res = await fetch('download.php?url=' + url);
                 let json = await res.json();
@@ -252,28 +253,180 @@
             }
         }
 
-        async function downloadURI(url) {
-            let filename = await downloadContent(url);
-            fetch('download/' + filename)
-                .then(response => response.blob())
-                .then(blob => {
-                    const link = document.createElement("a");
-                    link.href = URL.createObjectURL(blob);
-                    link.download = filename;
-                    link.click();
-                })
-                .catch(console.error);
+        function downloadURI(url) {
+            downloadContent(url).then((filename) => {
+                fetch('download/' + filename)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    })
+                    .catch(console.error);
+            });
         }
 
-        async function variation(url) {
-            fetch('variation.php?image=' + url)
-                .then(response => console.log(url))
-                .catch(console.error);
+        function variation(url) {
+            console.log(url)
+            postData("variation.php", {
+                image: url
+            }).then((data) => {
+                // console.log(data); // JSON data parsed by `data.json()` call
+                data.output.forEach((val) => {
+                    // console.log(val);
+                    createCard(val);
+                    $("#run").html('Run');
+                    $("#run").prop('disabled', false);
+                });
+            });
         }
+
+        function imagine(data = {}) {
+            postData("imagine.php", data).then((data) => {
+                // console.log(data); // JSON data parsed by `data.json()` call
+                data.output.forEach((val) => {
+                    // console.log(val);
+                    createCard(val);
+                    $("#run").html('Run');
+                    $("#run").prop('disabled', false);
+                });
+            });
+        }
+
+        async function postData(url = "", data = {}) {
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: "POST", // *GET, POST, PUT, DELETE, etc.
+                mode: "cors", // no-cors, *cors, same-origin
+                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: "same-origin", // include, *same-origin, omit
+                headers: {
+                    // "Content-Type": "application/json",
+                    // 'Content-Type': "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substr(2)
+                },
+                redirect: "follow", // manual, *follow, error
+                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: convertJsonToFormData(data), // body data type must match "Content-Type" header
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        function convertJsonToFormData(data) {
+            const formData = new FormData()
+            const entries = Object.entries(data) // returns array of object property as [key, value]
+            // https://medium.com/front-end-weekly/3-things-you-didnt-know-about-the-foreach-loop-in-js-ff02cec465b1
+
+            for (let i = 0; i < entries.length; i++) {
+                // don't try to be smart by replacing it with entries.each, it has drawbacks
+                const arKey = entries[i][0]
+                let arVal = entries[i][1]
+                if (typeof arVal === 'boolean') {
+                    arVal = arVal === true ? 1 : 0
+                }
+                if (Array.isArray(arVal)) {
+                    console.log('displaying arKey')
+                    console.log(arKey)
+                    console.log('displaying arval')
+                    console.log(arVal)
+
+                    if (this.isFile(arVal[0])) {
+                        for (let z = 0; z < arVal.length; z++) {
+                            formData.append(`${arKey}[]`, arVal[z])
+                        }
+
+                        continue // we don't need to append current element now, as its elements already appended
+                    } else if (arVal[0] instanceof Object) {
+                        for (let j = 0; j < arVal.length; j++) {
+                            if (arVal[j] instanceof Object) {
+                                // if first element is not file, we know its not files array
+                                for (const prop in arVal[j]) {
+                                    if (Object.prototype.hasOwnProperty.call(arVal[j], prop)) {
+                                        // do stuff
+                                        if (!isNaN(Date.parse(arVal[j][prop]))) {
+                                            // console.log('Valid Date \n')
+                                            // (new Date(fromDate)).toUTCString()
+                                            formData.append(
+                                                `${arKey}[${j}][${prop}]`,
+                                                new Date(arVal[j][prop])
+                                            )
+                                        } else {
+                                            formData.append(`${arKey}[${j}][${prop}]`, arVal[j][prop])
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        continue // we don't need to append current element now, as its elements already appended
+                    } else {
+                        arVal = JSON.stringify(arVal)
+                    }
+                }
+
+                if (arVal === null) {
+                    continue
+                }
+                formData.append(arKey, arVal)
+            }
+            return formData
+        }
+
 
         function display(url) {
             $("#exampleModal").find("img").attr("src", url);
             $("#exampleModal").modal();
+        }
+
+        function createCard(val) {
+            
+            const imgSrc = "download/" + val;
+            console.log(imgSrc);
+            const imgAlt = "Description de l'image";
+            const img = $("<img>").attr("src", imgSrc).attr("alt", imgAlt).addClass('img-fluid').css({
+                'width': '98px',
+                'height': '98px'
+            });
+
+            let card = $("<div>").addClass("border text-center float-left").css({
+                'width': '150px',
+                'height': '150px'
+            });
+
+            let cardImg = $("<div>").addClass("p-2 mb-2").css({
+                'height': '100px'
+            });
+
+            let buttons = $("<div>").addClass('d-flex');
+            let dButton = $("<button>").attr("type", "button")
+                .attr("title", "Donwload")
+                .addClass('btn btn-sm btn-block')
+                .append('<i class="fas fa-download"></i>')
+                .click(function() {
+                    downloadURI(imgSrc);
+                });
+
+            let aButton = $("<button>").attr("type", "button")
+                .attr("title", "Variation")
+                .addClass('btn btn-sm btn-block')
+                .append('<i class="fas fa-sync-alt"></i>')
+                .click(function() {
+                    variation(imgSrc);
+                });
+
+            let sButton = $("<button>").attr("type", "button")
+                .attr("title", "Show")
+                .addClass('btn btn-sm btn-block')
+                .append('<i class="fas fa-eye"></i>')
+                .click(function() {
+                    display(imgSrc);
+                });
+
+            buttons.append(dButton).append(aButton).append(sButton);
+
+            img.appendTo(cardImg);
+            cardImg.appendTo(card);
+            buttons.appendTo(card);
+            $("#outputBox").append(card);
         }
 
         $(document).ready(function() {
@@ -289,76 +442,12 @@
                 var painter = $("#painter").val();
                 var prompt = $("#prompt").val();
 
-                // Effectuer la requête POST
-                $.post("imagine.php", {
+                imagine({
                     inumber: inumber,
                     isize: isize,
                     painter: painter,
                     prompt: prompt,
-                    debug: true
-                }, function(jsonData) {
-                    // Gérer la réponse de la requête
-                    // console.log(jsonData);
-
-                    jsonData.output.forEach((val) => {
-                        // console.log(val);
-                        const imgSrc = val;
-                        const imgAlt = "Description de l'image";
-                        const img = $("<img>").attr("src", imgSrc).attr("alt", imgAlt).addClass('img-fluid').css({
-                            'width': '98px',
-                            'height': '98px'
-                        });
-
-                        let card = $("<div>").addClass("border text-center float-left").css({
-                            'width': '150px',
-                            'height': '150px'
-                        });
-
-                        let cardImg = $("<div>").addClass("p-2 mb-2").css({
-                            'height': '100px'
-                        });
-
-                        let buttons = $("<div>").addClass('d-flex');
-                        let dButton = $("<button>").attr("type", "button")
-                            .addClass('btn btn-sm btn-block')
-                            .append('<i class="fas fa-download"></i>')
-                            .click(function() {
-                                let me = $(this);
-                                // console.log(me.parent().parent().find('img').attr("src"))
-                                let url = me.parent().parent().find('img').attr("src");
-                                downloadURI(url);
-                            });
-
-                        let aButton = $("<button>").attr("type", "button")
-                            .addClass('btn btn-sm btn-block')
-                            .append('<i class="fas fa-sync-alt"></i>')
-                            .click(function() {
-                                let me = $(this);
-                                // console.log(me.parent().parent().find('img').attr("src"))
-                                let url = me.parent().parent().find('img').attr("src");
-                                variation(url);
-                            });
-
-                        let sButton = $("<button>").attr("type", "button")
-                            .addClass('btn btn-sm btn-block')
-                            .append('<i class="fas fa-eye"></i>')
-                            .click(function() {
-                                let me = $(this);
-                                // console.log(me.parent().parent().find('img').attr("src"))
-                                let url = me.parent().parent().find('img').attr("src");
-                                display(url);
-                            });
-
-                        buttons.append(dButton).append(aButton).append(sButton);
-
-                        img.appendTo(cardImg);
-                        cardImg.appendTo(card);
-                        buttons.appendTo(card);
-                        $("#outputBox").append(card);
-                        $("#run").html('Run');
-                        $("#run").prop('disabled', false);
-
-                    });
+                    debug: false
                 });
             });
         });

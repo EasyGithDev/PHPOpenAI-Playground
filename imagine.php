@@ -32,7 +32,7 @@ if ($inumber < 1 || $inumber > 4) {
 }
 
 $isize = ImageSizeEnum::tryFrom($isize) ?? ImageSizeEnum::is256;
-$rformat = ImageResponseEnum::URL;
+$rformat = ImageResponseEnum::B64_JSON;
 $by = empty($painter) ? '' : " by $painter";
 $prompt .= $by;
 
@@ -66,7 +66,9 @@ try {
     )->toObject();
 
     foreach ($response->data as $image) {
-        $images[] = $image->url;
+        $filename = uniqid("img_") . '.png';
+        file_put_contents(__DIR__ . '/download/' . $filename, base64_decode($image->b64_json));
+        $images[] = $filename;
     }
 } catch (ApiException $e) {
     $error['error']['message'] = $e->getMessage();

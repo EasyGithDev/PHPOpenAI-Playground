@@ -30,17 +30,18 @@ if (empty($image)) {
 //     echo json_encode($error);
 //     die;
 // }
-
+// var_dump($image);
+$image = __DIR__ . '/' . $image;
+$inumber = 1;
 $isize = ImageSizeEnum::is256;
-$rformat = ImageResponseEnum::URL;
+$rformat = ImageResponseEnum::B64_JSON;
 
 $responseArray = [
     'input' =>
     [
         'image' => $image,
         'isize' => $isize,
-        'rformat' => $rformat,
-        'painter' => $painter
+        'rformat' => $rformat
     ],
     'output' => []
 ];
@@ -64,7 +65,9 @@ try {
     )->toObject();
 
     foreach ($response->data as $image) {
-        $images[] = $image->url;
+        $filename = uniqid("img_") . '.png';
+        file_put_contents(__DIR__ . '/download/' . $filename, base64_decode($image->b64_json));
+        $images[] = $filename;
     }
 } catch (ApiException $e) {
     $error['error']['message'] = $e->getMessage();
