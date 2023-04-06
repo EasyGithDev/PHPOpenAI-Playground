@@ -8,6 +8,7 @@ use EasyGithDev\PHPOpenAI\Helpers\ImageResponseEnum;
 use EasyGithDev\PHPOpenAI\Helpers\ImageSizeEnum;
 use EasyGithDev\PHPOpenAI\OpenAIClient;
 
+const DOWNLOAD_DIR = __DIR__ . '/download';
 
 $prompt = filter_input(INPUT_POST, 'prompt', FILTER_SANITIZE_SPECIAL_CHARS);
 $inumber = filter_input(INPUT_POST, 'inumber', FILTER_VALIDATE_INT);
@@ -41,6 +42,7 @@ $responseArray = [
     [
         'prompt' => $prompt,
         'isize' => $isize,
+        'inumber' => $inumber,
         'rformat' => $rformat,
         'painter' => $painter
     ],
@@ -48,26 +50,26 @@ $responseArray = [
 ];
 
 if ($debug) {
-    $responseArray['output'][] = 'https://www.php.net/images/logos/php-logo-bigger.png';
+    $responseArray['output'][] = 'php-logo-bigger.png';
     echo json_encode($responseArray);
     die;
 }
 
 $images = [];
-$apiKey = getenv('OPENAI_API_KEY');
-$client = new OpenAIClient($apiKey);
 try {
-    $imageHandler = $client->Image();
-    $response = $imageHandler->create(
-        $prompt,
-        n: $inumber,
-        size: $isize,
-        response_format: $rformat
-    )->toObject();
+    $response = (new OpenAIClient(getenv('OPENAI_API_KEY')))
+        ->Image()
+        ->create(
+            $prompt,
+            n: $inumber,
+            size: $isize,
+            response_format: $rformat
+        )
+        ->toObject();
 
     foreach ($response->data as $image) {
-        $filename = uniqid("img_") . '.png';
-        file_put_contents(__DIR__ . '/download/' . $filename, base64_decode($image->b64_json));
+        $filename = uniqid("img_") . '_' . $isize->value . '.png';
+        file_put_contents(DOWNLOAD_DIR . '/' . $filename, base64_decode($image->b64_json));
         $images[] = $filename;
     }
 } catch (ApiException $e) {

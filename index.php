@@ -241,77 +241,6 @@
     <!-- Ajout du fichier JavaScript personnalisé -->
     <!-- <script src="script.js"></script> -->
     <script>
-        async function downloadContent(url) {
-            console.log(url);
-            try {
-                let res = await fetch('download.php?url=' + url);
-                let json = await res.json();
-                return (json.succes) ? json.filename : false;
-            } catch (error) {
-                console.log(error);
-                return false;
-            }
-        }
-
-        function downloadURI(url) {
-            downloadContent(url).then((filename) => {
-                fetch('download/' + filename)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(blob);
-                        link.download = filename;
-                        link.click();
-                    })
-                    .catch(console.error);
-            });
-        }
-
-        function variation(url) {
-            console.log(url)
-            postData("variation.php", {
-                image: url
-            }).then((data) => {
-                // console.log(data); // JSON data parsed by `data.json()` call
-                data.output.forEach((val) => {
-                    // console.log(val);
-                    createCard(val);
-                    $("#run").html('Run');
-                    $("#run").prop('disabled', false);
-                });
-            });
-        }
-
-        function imagine(data = {}) {
-            postData("imagine.php", data).then((data) => {
-                // console.log(data); // JSON data parsed by `data.json()` call
-                data.output.forEach((val) => {
-                    // console.log(val);
-                    createCard(val);
-                    $("#run").html('Run');
-                    $("#run").prop('disabled', false);
-                });
-            });
-        }
-
-        async function postData(url = "", data = {}) {
-            // Default options are marked with *
-            const response = await fetch(url, {
-                method: "POST", // *GET, POST, PUT, DELETE, etc.
-                mode: "cors", // no-cors, *cors, same-origin
-                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: "same-origin", // include, *same-origin, omit
-                headers: {
-                    // "Content-Type": "application/json",
-                    // 'Content-Type': "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substr(2)
-                },
-                redirect: "follow", // manual, *follow, error
-                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                body: convertJsonToFormData(data), // body data type must match "Content-Type" header
-            });
-            return response.json(); // parses JSON response into native JavaScript objects
-        }
-
         function convertJsonToFormData(data) {
             const formData = new FormData()
             const entries = Object.entries(data) // returns array of object property as [key, value]
@@ -371,32 +300,127 @@
             return formData
         }
 
+        async function postData(url = "", data = {}) {
+            // Default options are marked with *
+            const response = await fetch(url, {
+                method: "POST", // *GET, POST, PUT, DELETE, etc.
+                mode: "cors", // no-cors, *cors, same-origin
+                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+                credentials: "same-origin", // include, *same-origin, omit
+                headers: {
+                    // "Content-Type": "application/json",
+                    // 'Content-Type': "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substr(2)
+                },
+                redirect: "follow", // manual, *follow, error
+                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+                body: convertJsonToFormData(data), // body data type must match "Content-Type" header
+            });
+            return response.json(); // parses JSON response into native JavaScript objects
+        }
+
+        async function downloadContent(url) {
+            try {
+                let res = await fetch('download.php?url=' + url);
+                let json = await res.json();
+                return (json.succes) ? json.filename : false;
+            } catch (error) {
+                console.log(error);
+                return false;
+            }
+        }
+
+        function downloadURI(url) {
+            downloadContent(url).then((filename) => {
+                fetch(url)
+                    .then(response => response.blob())
+                    .then(blob => {
+                        const link = document.createElement("a");
+                        link.href = URL.createObjectURL(blob);
+                        link.download = filename;
+                        link.click();
+                    })
+                    .catch(error => {
+                        console.error(error);
+                    });
+            });
+        }
+
+        function variation(url) {
+            console.log(url)
+            $("#run").prop('disabled', true);
+            $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+
+            postData("variation.php", {
+                    image: url
+                }).then((data) => {
+                    // console.log(data); // JSON data parsed by `data.json()` call
+                    data.output.forEach((val) => {
+                        let imgSrc = 'download/' + val;
+                        let thumbnail = createCard(imgSrc);
+                        $("#outputBox").append(thumbnail);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    $("#run").html('Run');
+                    $("#run").prop('disabled', false);
+                });;
+        }
+
+        function imagine(data = {}) {
+            $("#run").prop('disabled', true);
+            $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
+
+            postData("imagine.php", data).then((data) => {
+                    // console.log(data); // JSON data parsed by `data.json()` call
+                    data.output.forEach((val) => {
+                        // console.log(val);
+                        let imgSrc = 'download/' + val;
+                        let thumbnail = createCard(imgSrc);
+                        $("#outputBox").append(thumbnail);
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                })
+                .finally(() => {
+                    $("#run").html('Run');
+                    $("#run").prop('disabled', false);
+                });
+        }
 
         function display(url) {
             $("#exampleModal").find("img").attr("src", url);
             $("#exampleModal").modal();
         }
 
-        function createCard(val) {
-            
-            const imgSrc = "download/" + val;
+        function createCard(imgSrc) {
+
             console.log(imgSrc);
             const imgAlt = "Description de l'image";
-            const img = $("<img>").attr("src", imgSrc).attr("alt", imgAlt).addClass('img-fluid').css({
-                'width': '98px',
-                'height': '98px'
-            });
+            const img = $("<img>").attr("src", imgSrc)
+                .attr("alt", imgAlt)
+                .addClass('img-fluid')
+                .css({
+                    'width': '98px',
+                    'height': '98px'
+                });
 
-            let card = $("<div>").addClass("border text-center float-left").css({
-                'width': '150px',
-                'height': '150px'
-            });
+            let card = $("<div>").addClass("border text-center float-left")
+                .css({
+                    'width': '150px',
+                    'height': '150px'
+                });
 
-            let cardImg = $("<div>").addClass("p-2 mb-2").css({
-                'height': '100px'
-            });
+            let cardImg = $("<div>").addClass("p-2 mb-2")
+                .css({
+                    'height': '100px'
+                });
 
             let buttons = $("<div>").addClass('d-flex');
+
             let dButton = $("<button>").attr("type", "button")
                 .attr("title", "Donwload")
                 .addClass('btn btn-sm btn-block')
@@ -426,27 +450,19 @@
             img.appendTo(cardImg);
             cardImg.appendTo(card);
             buttons.appendTo(card);
-            $("#outputBox").append(card);
+
+            return card;
         }
 
         $(document).ready(function() {
+
             // Lorsque le bouton de soumission est cliqué
             $("#run").click(function() {
-
-                $("#run").prop('disabled', true);
-                $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
-
-                // Récupérer les valeurs des champs de formulaire
-                var inumber = $("#inumber").val();
-                var isize = $("#isize").val();
-                var painter = $("#painter").val();
-                var prompt = $("#prompt").val();
-
                 imagine({
-                    inumber: inumber,
-                    isize: isize,
-                    painter: painter,
-                    prompt: prompt,
+                    inumber: $("#inumber").val(),
+                    isize: $("#isize").val(),
+                    painter: $("#painter").val(),
+                    prompt: $("#prompt").val(),
                     debug: false
                 });
             });
