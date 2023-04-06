@@ -241,8 +241,20 @@
     <!-- Ajout du fichier JavaScript personnalisé -->
     <!-- <script src="script.js"></script> -->
     <script>
-        function downloadURI(url, name) {
-            fetch(url)
+        async function downloadContent(url) {
+            try {
+                let res = await fetch('download.php?url=' + url);
+                let json = await res.json();
+                return (json.succes) ? json.filename : false;
+            } catch (error) {
+                console.log(error);
+                return false;
+            }
+        }
+
+        async function downloadURI(url) {
+            let filename = await downloadContent(url);
+            fetch('download/' + filename)
                 .then(response => response.blob())
                 .then(blob => {
                     const link = document.createElement("a");
@@ -253,8 +265,8 @@
                 .catch(console.error);
         }
 
-        function variation(url) {
-            fetch('variation.php?img=' + url)
+        async function variation(url) {
+            fetch('variation.php?image=' + url)
                 .then(response => console.log(url))
                 .catch(console.error);
         }
@@ -314,7 +326,7 @@
                                 let me = $(this);
                                 // console.log(me.parent().parent().find('img').attr("src"))
                                 let url = me.parent().parent().find('img').attr("src");
-                                downloadURI(url, 'image.jpeg');
+                                downloadURI(url);
                             });
 
                         let aButton = $("<button>").attr("type", "button")
