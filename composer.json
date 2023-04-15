@@ -1,5 +1,5 @@
 {
     "require": {
-        "easygithdev/php-openai": "^2.0"
+        "easygithdev/php-openai": "*"
     }
 }

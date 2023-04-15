@@ -1,4 +1,4 @@
-# Dall-e-playground
+# PHPOpenAI-Playground
 An example of using the project `PHPOpenAI`
 
 The main project is hosted here :
@@ -21,7 +21,7 @@ The project uses Composer to manage dependencies. If you haven't already install
 To install the project, you can clone it from GitHub using the following Git command:
 
 ```bash
-git clone git@github.com:EasyGithDev/dall-e-playground.git
+git clone git@github.com:EasyGithDev/PHPOpenAI-Playground.git
 ```
 
 #### Install the project
