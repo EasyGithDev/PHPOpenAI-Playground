@@ -1,3 +1,5 @@
+const downloadDir = 'download';
+
 async function postData(url, formData) {
     // Default options are marked with *
     const response = await fetch(url, {
@@ -16,31 +18,20 @@ async function postData(url, formData) {
     return response.json(); // parses JSON response into native JavaScript objects
 }
 
-async function downloadContent(url) {
-    try {
-        let res = await fetch('download.php?url=' + url);
-        let json = await res.json();
-        return (json.succes) ? json.filename : false;
-    } catch (error) {
-        console.log(error);
-        return false;
-    }
-}
+function downloadImg(url) {
+    // Créer une balise <a> pour télécharger l'image
+    var link = document.createElement("a");
+    link.href = url;
+    link.download = "image.png";
 
-function downloadURI(url) {
-    downloadContent(url).then((filename) => {
-        fetch(url)
-            .then(response => response.blob())
-            .then(blob => {
-                const link = document.createElement("a");
-                link.href = URL.createObjectURL(blob);
-                link.download = filename;
-                link.click();
-            })
-            .catch(error => {
-                console.error(error);
-            });
-    });
+    // Ajouter la balise <a> au DOM
+    document.body.appendChild(link);
+
+    // Simuler un clic sur la balise <a> pour lancer le téléchargement
+    link.click();
+
+    // Retirer la balise <a> du DOM une fois le téléchargement terminé
+    document.body.removeChild(link);
 }
 
 function variation(formData) {
@@ -49,7 +40,7 @@ function variation(formData) {
     postData("variation.php", formData).then((data) => {
         // console.log(data); // JSON data parsed by `data.json()` call
         data.output.forEach((val) => {
-            let imgSrc = 'download/' + val;
+            let imgSrc = downloadDir + '/' + val;
             let thumbnail = createCard(imgSrc);
             $("#outputBox").append(thumbnail);
         });
@@ -67,7 +58,7 @@ function imagine(formData) {
         // console.log(data); // JSON data parsed by `data.json()` call
         data.output.forEach((val) => {
             // console.log(val);
-            let imgSrc = 'download/' + val;
+            let imgSrc = downloadDir + '/' + val;
             let thumbnail = createCard(imgSrc);
             $("#outputBox").append(thumbnail);
         });
@@ -120,7 +111,7 @@ function createCard(imgSrc) {
         .addClass('btn btn-sm btn-block')
         .append('<i class="fas fa-download"></i>')
         .click(function () {
-            downloadURI(imgSrc);
+            downloadImg(imgSrc);
         });
 
     let aButton = $("<button>").attr("type", "button")
