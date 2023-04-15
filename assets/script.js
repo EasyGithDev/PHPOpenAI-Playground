@@ -22,7 +22,7 @@ function downloadImg(url) {
     // Créer une balise <a> pour télécharger l'image
     var link = document.createElement("a");
     link.href = url;
-    link.download = "image.png";
+    link.download = url.split("/").pop();    ;
 
     // Ajouter la balise <a> au DOM
     document.body.appendChild(link);
