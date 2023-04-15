@@ -250,224 +250,8 @@
         crossorigin="anonymous"></script>
 
     <!-- Ajout du fichier JavaScript personnalisé -->
-    <!-- <script src="script.js"></script> -->
+    <script src="assets/script.js"></script>
     <script>
-        function convertJsonToFormData(data) {
-            const formData = new FormData()
-            const entries = Object.entries(data) // returns array of object property as [key, value]
-            // https://medium.com/front-end-weekly/3-things-you-didnt-know-about-the-foreach-loop-in-js-ff02cec465b1
-
-            for (let i = 0; i < entries.length; i++) {
-                // don't try to be smart by replacing it with entries.each, it has drawbacks
-                const arKey = entries[i][0]
-                let arVal = entries[i][1]
-                if (typeof arVal === 'boolean') {
-                    arVal = arVal === true ? 1 : 0
-                }
-                if (Array.isArray(arVal)) {
-                    console.log('displaying arKey')
-                    console.log(arKey)
-                    console.log('displaying arval')
-                    console.log(arVal)
-
-                    if (this.isFile(arVal[0])) {
-                        for (let z = 0; z < arVal.length; z++) {
-                            formData.append(`${arKey}[]`, arVal[z])
-                        }
-
-                        continue // we don't need to append current element now, as its elements already appended
-                    } else if (arVal[0] instanceof Object) {
-                        for (let j = 0; j < arVal.length; j++) {
-                            if (arVal[j] instanceof Object) {
-                                // if first element is not file, we know its not files array
-                                for (const prop in arVal[j]) {
-                                    if (Object.prototype.hasOwnProperty.call(arVal[j], prop)) {
-                                        // do stuff
-                                        if (!isNaN(Date.parse(arVal[j][prop]))) {
-                                            // console.log('Valid Date \n')
-                                            // (new Date(fromDate)).toUTCString()
-                                            formData.append(
-                                                `${arKey}[${j}][${prop}]`,
-                                                new Date(arVal[j][prop])
-                                            )
-                                        } else {
-                                            formData.append(`${arKey}[${j}][${prop}]`, arVal[j][prop])
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        continue // we don't need to append current element now, as its elements already appended
-                    } else {
-                        arVal = JSON.stringify(arVal)
-                    }
-                }
-
-                if (arVal === null) {
-                    continue
-                }
-                formData.append(arKey, arVal)
-            }
-            return formData
-        }
-
-        async function postData(url = "", data = {}) {
-            // Default options are marked with *
-            const response = await fetch(url, {
-                method: "POST", // *GET, POST, PUT, DELETE, etc.
-                mode: "cors", // no-cors, *cors, same-origin
-                cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-                credentials: "same-origin", // include, *same-origin, omit
-                headers: {
-                    // "Content-Type": "application/json",
-                    // 'Content-Type': "multipart/form-data; charset=utf-8; boundary=" + Math.random().toString().substr(2)
-                },
-                redirect: "follow", // manual, *follow, error
-                referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-                body: convertJsonToFormData(data), // body data type must match "Content-Type" header
-            });
-            return response.json(); // parses JSON response into native JavaScript objects
-        }
-
-        function disableUi(val) {
-            $('button').prop('disabled', val);
-        }
-
-        async function downloadContent(url) {
-            try {
-                let res = await fetch('download.php?url=' + url);
-                let json = await res.json();
-                return (json.succes) ? json.filename : false;
-            } catch (error) {
-                console.log(error);
-                return false;
-            }
-        }
-
-        function downloadURI(url) {
-            downloadContent(url).then((filename) => {
-                fetch(url)
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const link = document.createElement("a");
-                        link.href = URL.createObjectURL(blob);
-                        link.download = filename;
-                        link.click();
-                    })
-                    .catch(error => {
-                        console.error(error);
-                    });
-            });
-        }
-
-        function variation(url) {
-            console.log(url)
-            disableUi(true);
-            $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
-
-            postData("variation.php", {
-                image: url
-            }).then((data) => {
-                // console.log(data); // JSON data parsed by `data.json()` call
-                data.output.forEach((val) => {
-                    let imgSrc = 'download/' + val;
-                    let thumbnail = createCard(imgSrc);
-                    $("#outputBox").append(thumbnail);
-                });
-            })
-                .catch(error => {
-                    console.error(error);
-                })
-                .finally(() => {
-                    $("#run").html('Run');
-                    disableUi(false);
-                });;
-        }
-
-        function imagine(data = {}) {
-            disableUi(true);
-            $("#run").html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...');
-
-            postData("imagine.php", data).then((data) => {
-                // console.log(data); // JSON data parsed by `data.json()` call
-                data.output.forEach((val) => {
-                    // console.log(val);
-                    let imgSrc = 'download/' + val;
-                    let thumbnail = createCard(imgSrc);
-                    $("#outputBox").append(thumbnail);
-                });
-            })
-                .catch(error => {
-                    console.error(error);
-                })
-                .finally(() => {
-                    $("#run").html('Run');
-                    disableUi(false);
-                });
-        }
-
-        function display(url) {
-            $("#exampleModal").find("img").attr("src", url);
-            $("#exampleModal").modal();
-        }
-
-        function createCard(imgSrc) {
-
-            console.log(imgSrc);
-            const imgAlt = "Description de l'image";
-            const img = $("<img>").attr("src", imgSrc)
-                .attr("alt", imgAlt)
-                .addClass('img-fluid')
-                .css({
-                    'width': '98px',
-                    'height': '98px'
-                });
-
-            let card = $("<div>").addClass("border text-center float-left")
-                .css({
-                    'width': '150px',
-                    'height': '150px'
-                });
-
-            let cardImg = $("<div>").addClass("p-2 mb-2")
-                .css({
-                    'height': '100px'
-                });
-
-            let buttons = $("<div>").addClass('d-flex');
-
-            let dButton = $("<button>").attr("type", "button")
-                .attr("title", "Donwload")
-                .addClass('btn btn-sm btn-block')
-                .append('<i class="fas fa-download"></i>')
-                .click(function () {
-                    downloadURI(imgSrc);
-                });
-
-            let aButton = $("<button>").attr("type", "button")
-                .attr("title", "Variation")
-                .addClass('btn btn-sm btn-block')
-                .append('<i class="fas fa-sync-alt"></i>')
-                .click(function () {
-                    variation(imgSrc);
-                });
-
-            let sButton = $("<button>").attr("type", "button")
-                .attr("title", "Show")
-                .addClass('btn btn-sm btn-block')
-                .append('<i class="fas fa-eye"></i>')
-                .click(function () {
-                    display(imgSrc);
-                });
-
-            buttons.append(dButton).append(aButton).append(sButton);
-
-            img.appendTo(cardImg);
-            cardImg.appendTo(card);
-            buttons.appendTo(card);
-
-            return card;
-        }
 
         $(document).ready(function () {
 
@@ -483,13 +267,15 @@
 
             // Lorsque le bouton de soumission est cliqué
             $("#run").click(function () {
-                imagine({
-                    inumber: $("#inumber").val(),
-                    isize: $("#isize").val(),
-                    painter: $("#painter").val(),
-                    prompt: $("#prompt").val(),
-                    debug: false
-                });
+
+                const formData = new FormData();
+                formData.append('inumber', $("#inumber").val());
+                formData.append('isize', $("#isize").val());
+                formData.append('painter', $("#painter").val());
+                formData.append('prompt', $("#prompt").val());
+                formData.append('debug', false);
+
+                imagine(formData);
             });
         });
     </script>
