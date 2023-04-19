@@ -1,4 +1,4 @@
-const downloadDir = 'download';
+const downloadDir = '../download';
 
 async function postData(url, formData) {
     // Default options are marked with *
@@ -22,7 +22,7 @@ function downloadImg(url) {
     // Créer une balise <a> pour télécharger l'image
     var link = document.createElement("a");
     link.href = url;
-    link.download = url.split("/").pop();    ;
+    link.download = url.split("/").pop();;
 
     // Ajouter la balise <a> au DOM
     document.body.appendChild(link);
@@ -39,6 +39,11 @@ function variation(formData) {
 
     postData("variation.php", formData).then((data) => {
         // console.log(data); // JSON data parsed by `data.json()` call
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+
         data.output.forEach((val) => {
             let imgSrc = downloadDir + '/' + val;
             let thumbnail = createCard(imgSrc);
@@ -56,6 +61,11 @@ function imagine(formData) {
 
     postData("imagine.php", formData).then((data) => {
         // console.log(data); // JSON data parsed by `data.json()` call
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        
         data.output.forEach((val) => {
             // console.log(val);
             let imgSrc = downloadDir + '/' + val;
