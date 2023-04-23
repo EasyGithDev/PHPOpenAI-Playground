@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2023-present Florent Brusciano <easygithdev@gmail.com>
+ *
+ * For copyright and license information, please view the LICENSE file that was distributed with this source code.
+ *
+ * Please see the README.md file for usage instructions.
+ */
+
 const downloadDir = '../download';
 
 async function postData(url, formData) {
@@ -22,7 +30,7 @@ function downloadImg(url) {
     // Créer une balise <a> pour télécharger l'image
     var link = document.createElement("a");
     link.href = url;
-    link.download = url.split("/").pop();;
+    link.download = url.split("/").pop();
 
     // Ajouter la balise <a> au DOM
     document.body.appendChild(link);
@@ -65,7 +73,30 @@ function imagine(formData) {
             alert(data.error);
             return;
         }
-        
+
+        data.output.forEach((val) => {
+            // console.log(val);
+            let imgSrc = downloadDir + '/' + val;
+            let thumbnail = createCard(imgSrc);
+            $("#outputBox").append(thumbnail);
+        });
+    }).catch(error => {
+        console.error(error);
+    }).finally(() => {
+        disableUi(false);
+    });
+}
+
+function display() {
+    disableUi(true);
+
+    postData("display.php").then((data) => {
+        // console.log(data); // JSON data parsed by `data.json()` call
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+
         data.output.forEach((val) => {
             // console.log(val);
             let imgSrc = downloadDir + '/' + val;
@@ -94,13 +125,18 @@ function displayCard(url) {
 
 function createCard(imgSrc) {
 
-    const imgAlt = "Description de l'image";
+    const imgAlt = imgSrc.split("/").pop();
+    const imgTitle = imgSrc.split("/").pop();
     const img = $("<img>").attr("src", imgSrc)
         .attr("alt", imgAlt)
+        .attr("title", imgTitle)
         .addClass('img-fluid')
         .css({
             'width': '98px',
             'height': '98px'
+        })
+        .click(function () {
+            displayCard(imgSrc);
         });
 
     let card = $("<div>").addClass("border text-center float-left")
