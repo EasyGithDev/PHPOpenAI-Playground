@@ -16,15 +16,19 @@ $config = require __DIR__ . '/../config/conf.php';
 
 $responseArray = [
     'success' => false,
-    'input' => [],
     'output' => []
 ];
 
+require __DIR__ . '/../classes/ImageSerializer.php';
 $images = [];
 
 foreach (new DirectoryIterator($config['downloadDir']) as $file) {
-    if($file->getExtension() == 'png') {
-        $images[] = $file->getFilename();
+    if ($file->getExtension() == 'png') {
+        $jsonFilename = $config['serializeDir'] . '/' . str_replace('.png', '.json', $file->getFilename());
+        $infos = ImageSerializer::load($jsonFilename);
+        if ($infos) {
+            $images[] = $infos;
+        }
     }
 }
 

@@ -53,8 +53,7 @@ function variation(formData) {
         }
 
         data.output.forEach((val) => {
-            let imgSrc = downloadDir + '/' + val;
-            let thumbnail = createCard(imgSrc);
+            let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
         });
     }).catch(error => {
@@ -76,8 +75,7 @@ function imagine(formData) {
 
         data.output.forEach((val) => {
             // console.log(val);
-            let imgSrc = downloadDir + '/' + val;
-            let thumbnail = createCard(imgSrc);
+            let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
         });
     }).catch(error => {
@@ -99,8 +97,7 @@ function display() {
 
         data.output.forEach((val) => {
             // console.log(val);
-            let imgSrc = downloadDir + '/' + val;
-            let thumbnail = createCard(imgSrc);
+            let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
         });
     }).catch(error => {
@@ -123,13 +120,16 @@ function displayCard(url) {
     $("#exampleModal").modal();
 }
 
-function createCard(imgSrc) {
+function createCard(imgObj) {
 
+    const imgSrc = downloadDir + '/' + imgObj.filename;
     const imgAlt = imgSrc.split("/").pop();
-    const imgTitle = imgSrc.split("/").pop();
-    const img = $("<img>").attr("src", imgSrc)
+    const imgTitle = imgObj.prompt;
+
+    let img = $("<img>").attr("src", imgSrc)
         .attr("alt", imgAlt)
         .attr("title", imgTitle)
+        .data("info", imgObj)
         .addClass('img-fluid')
         .css({
             'width': '98px',
@@ -166,7 +166,11 @@ function createCard(imgSrc) {
         .append('<i class="fas fa-sync-alt"></i>')
         .click(function () {
             const formData = new FormData();
-            formData.append('image', imgSrc);
+            for (const property in imgObj) {
+                // console.log(`${property}: ${object[property]}`);
+                formData.append(property, imgObj[property]); 
+            }
+              
             variation(formData);
         });
 

@@ -18,10 +18,10 @@ use EasyGithDev\PHPOpenAI\Helpers\ImageSizeEnum;
 use EasyGithDev\PHPOpenAI\OpenAIClient;
 
 $config = require __DIR__ . '/../config/conf.php';
+require __DIR__ . '/../classes/ImageSerializer.php';
 
 $responseArray = [
     'success' => false,
-    'input' => [],
     'output' => []
 ];
 
@@ -48,7 +48,7 @@ $rformat = ImageResponseEnum::B64_JSON;
 $by = empty($painter) ? '' : " by $painter";
 $prompt .= $by;
 
-$responseArray['input'] = [
+$input = [
     'prompt' => $prompt,
     'isize' => $isize,
     'inumber' => $inumber,
@@ -76,9 +76,17 @@ try {
         ->toObject();
 
     foreach ($response->data as $image) {
-        $filename = uniqid("img_") . '_' . $isize->value . '.png';
-        file_put_contents($config['downloadDir'] . '/' . $filename, base64_decode($image->b64_json));
-        $images[] = $filename;
+
+        $id = uniqid("img_");
+        $imgFilename =  $id . '_' . $isize->value . '.png';
+        $jsonFilename =  $id . '_' . $isize->value . '.json';
+
+        $input['filename'] =  $imgFilename;
+
+        file_put_contents($config['downloadDir'] . '/' . $imgFilename, base64_decode($image->b64_json));
+        if (!ImageSerializer::write($config['serializeDir'] . '/' . $jsonFilename, $input))
+            throw new Exception("Serialize fail");
+        $images[] = $input;
     }
 } catch (ApiException $e) {
     $responseArray['error'] = $e->getMessage();

@@ -18,34 +18,36 @@ use EasyGithDev\PHPOpenAI\Helpers\ImageSizeEnum;
 use EasyGithDev\PHPOpenAI\OpenAIClient;
 
 $config = require __DIR__ . '/../config/conf.php';
+require __DIR__ . '/../classes/ImageSerializer.php';
 
 $responseArray = [
     'success' => false,
-    'input' => [],
     'output' => []
 ];
 
-$image = filter_input(INPUT_POST, 'image', FILTER_SANITIZE_SPECIAL_CHARS);
+$filename = filter_input(INPUT_POST, 'filename', FILTER_SANITIZE_SPECIAL_CHARS);
+$prompt = filter_input(INPUT_POST, 'prompt', FILTER_SANITIZE_SPECIAL_CHARS);
+$inumber = filter_input(INPUT_POST, 'inumber', FILTER_VALIDATE_INT);
+$isize = filter_input(INPUT_POST, 'isize', FILTER_SANITIZE_SPECIAL_CHARS);
+$painter = filter_input(INPUT_POST, 'painter', FILTER_SANITIZE_SPECIAL_CHARS);
 
-if (empty($image)) {
+if (empty($filename)) {
     $responseArray['error'] = 'Image is required';
     echo json_encode($responseArray);
     die;
 }
 
-$image = __DIR__ . '/' . $image;
-$filename = str_replace('.png', '', pathinfo($image, PATHINFO_FILENAME));
-[,, $isize] = explode('_', $filename);
-$inumber = 1;
+$image = $config['downloadDir'] . '/' . $filename;
 $isize = ImageSizeEnum::tryFrom($isize) ?? ImageSizeEnum::is256;
 $rformat = ImageResponseEnum::B64_JSON;
 
-$responseArray['input'] = [
+$input = [
 
-    'image' => $image,
-    'inumber' => $inumber,
+    'prompt' => $prompt,
     'isize' => $isize,
-    'rformat' => $rformat
+    'inumber' => $inumber,
+    'rformat' => $rformat,
+    'painter' => $painter
 
 ];
 
@@ -64,9 +66,18 @@ try {
         ->toObject();
 
     foreach ($response->data as $image) {
-        $filename = uniqid("img_") . '_' . $isize->value . '.png';
-        file_put_contents($config['downloadDir'] . '/' . $filename, base64_decode($image->b64_json));
-        $images[] = $filename;
+
+        $id = uniqid("img_");
+        $imgFilename =  $id . '_' . $isize->value . '.png';
+        $jsonFilename =  $id . '_' . $isize->value . '.json';
+
+        $input['filename'] =  $imgFilename;
+
+        file_put_contents($config['downloadDir'] . '/' . $imgFilename, base64_decode($image->b64_json));
+        if (!ImageSerializer::write($config['serializeDir'] . '/' . $jsonFilename, $input))
+            throw new Exception("Serialize fail");
+
+        $images[] = $input;
     }
 } catch (ApiException $e) {
     $responseArray['error'] = $e->getMessage();
