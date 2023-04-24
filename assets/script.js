@@ -115,31 +115,32 @@ function disableUi(val) {
         $("#run").html('Run');
 }
 
-function displayCard(url) {
-    $("#exampleModal").find("img").attr("src", url);
+function displayCard(imgObj) {
+    const imgSrc = downloadDir + '/' + imgObj.filename;
+
+    $("#exampleModal").find("img").attr("src", imgSrc);
+    $("#exampleModalLabel").html(imgObj.prompt);
     $("#exampleModal").modal();
 }
 
-function inputUpdate(imgObj) {
+function inputUpdated(imgObj) {
     $("#inumber").val(imgObj.inumber);
     $("#isize").val(imgObj.isize);
     $("#painter").val(imgObj.painter);
     $("#prompt").val(imgObj.prompt);
-
 }
 
-function unactive() {
-    $(".active").each(
-        function (index) {
-            $(this).removeClass("active");
-        }
-    );
+function imageActivated(img) {
+    $(".active").each(function () {
+        $(this).removeClass("active");
+    });
+    img.addClass('active')
 }
 
 function createCard(imgObj) {
 
     const imgSrc = downloadDir + '/' + imgObj.filename;
-    const imgAlt = imgSrc.split("/").pop();
+    const imgAlt = imgObj.filename;
     const imgTitle = imgObj.prompt;
 
     let img = $("<img>").attr("src", imgSrc)
@@ -153,55 +154,70 @@ function createCard(imgObj) {
             'height': '98px'
         })
         .click(function (e) {
-            unactive();
-            $(e.target).addClass('active')
-            inputUpdate(imgObj);
+            imageActivated($(e.target));
+            inputUpdated(imgObj);
         });
 
     let card = $("<div>").addClass("border text-center float-left")
         .css({
-            'width': '150px',
-            'height': '150px'
+            'width': '160px',
+            'height': '160px'
         });
 
     let cardImg = $("<div>").addClass("p-2 mb-2")
         .css({
-            'height': '100px'
+            'height': '110px'
         });
 
-    let buttons = $("<div>").addClass('d-flex');
 
+    // download button
     let dButton = $("<button>").attr("type", "button")
         .attr("title", "Donwload")
-        .addClass('btn btn-sm btn-block')
-        .append('<i class="fas fa-download"></i>')
+        .addClass('btn btn-sm')
+        .append('<i class="fa-solid fa-download fa-fw""></i>')
         .click(function () {
+            inputUpdated(imgObj);
             downloadImg(imgSrc);
         });
 
+    // variation button
     let aButton = $("<button>").attr("type", "button")
         .attr("title", "Variation")
-        .addClass('btn btn-sm btn-block')
-        .append('<i class="fas fa-sync-alt"></i>')
+        .addClass('btn btn-sm')
+        .append('<i class="fa-solid fa-rotate-right fa-fw""></i>')
         .click(function () {
+            inputUpdated(imgObj);
             const formData = new FormData();
             for (const property in imgObj) {
-                // console.log(`${property}: ${object[property]}`);
                 formData.append(property, imgObj[property]);
             }
-
             variation(formData);
         });
 
+    // show button
     let sButton = $("<button>").attr("type", "button")
         .attr("title", "Show")
-        .addClass('btn btn-sm btn-block')
-        .append('<i class="fas fa-eye"></i>')
+        .addClass('btn btn-sm')
+        .append('<i class="fa-solid fa-eye fa-fw""></i>')
         .click(function () {
-            displayCard(imgSrc);
+            inputUpdated(imgObj);
+            displayCard(imgObj);
         });
 
-    buttons.append(dButton).append(aButton).append(sButton);
+    let deleteButton = $("<button>").attr("type", "button")
+        .attr("title", "Delete")
+        .addClass('btn btn-sm')
+        .append('<i class="fa-solid fa-trash-can fa-fw""></i>')
+        .click(function () {
+
+        });
+
+    let buttons = $("<div>").addClass('btn-group')
+        .attr("role", "group")
+        .append(deleteButton)
+        .append(dButton)
+        .append(aButton)
+        .append(sButton);
 
     img.appendTo(cardImg);
     cardImg.appendTo(card);
