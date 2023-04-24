@@ -120,6 +120,22 @@ function displayCard(url) {
     $("#exampleModal").modal();
 }
 
+function inputUpdate(imgObj) {
+    $("#inumber").val(imgObj.inumber);
+    $("#isize").val(imgObj.isize);
+    $("#painter").val(imgObj.painter);
+    $("#prompt").val(imgObj.prompt);
+
+}
+
+function unactive() {
+    $(".active").each(
+        function (index) {
+            $(this).removeClass("active");
+        }
+    );
+}
+
 function createCard(imgObj) {
 
     const imgSrc = downloadDir + '/' + imgObj.filename;
@@ -131,12 +147,15 @@ function createCard(imgObj) {
         .attr("title", imgTitle)
         .data("info", imgObj)
         .addClass('img-fluid')
+        .addClass('cursor-pointer')
         .css({
             'width': '98px',
             'height': '98px'
         })
-        .click(function () {
-            displayCard(imgSrc);
+        .click(function (e) {
+            unactive();
+            $(e.target).addClass('active')
+            inputUpdate(imgObj);
         });
 
     let card = $("<div>").addClass("border text-center float-left")
@@ -168,9 +187,9 @@ function createCard(imgObj) {
             const formData = new FormData();
             for (const property in imgObj) {
                 // console.log(`${property}: ${object[property]}`);
-                formData.append(property, imgObj[property]); 
+                formData.append(property, imgObj[property]);
             }
-              
+
             variation(formData);
         });
 

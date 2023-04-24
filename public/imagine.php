@@ -45,8 +45,6 @@ if ($inumber < 1 || $inumber > 4) {
 
 $isize = ImageSizeEnum::tryFrom($isize) ?? ImageSizeEnum::is256;
 $rformat = ImageResponseEnum::B64_JSON;
-$by = empty($painter) ? '' : " by $painter";
-$prompt .= $by;
 
 $input = [
     'prompt' => $prompt,
@@ -55,6 +53,9 @@ $input = [
     'rformat' => $rformat,
     'painter' => $painter
 ];
+
+$by = empty($painter) ? '' : " by $painter";
+$prompt .= $by;
 
 if ($debug) {
     $responseArray['output'][] = 'php-logo-bigger.png';
