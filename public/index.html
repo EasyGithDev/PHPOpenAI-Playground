@@ -10,6 +10,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Ajout des fichiers CSS personnalisés -->
     <!-- <link rel="stylesheet" href="style.css"> -->
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .active {
+            border: 3px solid black;
+        }
+    </style>
 </head>
 
 <body>
@@ -49,7 +57,7 @@
                             Outputs
                         </div>
                         <div class="card-body" id="outputBox">
-                           
+
                         </div>
                     </div>
 
@@ -68,7 +76,8 @@
                                 <!-- Input Box -->
                                 <div class="form-group">
                                     <label for="prompt">Prompt:</label>
-                                    <textarea class="form-control" id="prompt" rows="5" placeholder="Enter a prompt" required></textarea>
+                                    <textarea class="form-control" id="prompt" rows="5" placeholder="Enter a prompt"
+                                        required></textarea>
                                 </div>
 
                                 <!-- Painters -->
