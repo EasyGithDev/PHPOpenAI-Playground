@@ -85,6 +85,23 @@ function imagine(formData) {
     });
 }
 
+function delImage(formData) {
+    disableUi(true);
+
+    postData("delete.php", formData).then((data) => {
+        // console.log(data); // JSON data parsed by `data.json()` call
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        $("#" + data.output.image).parent().parent().remove();
+    }).catch(error => {
+        console.error(error);
+    }).finally(() => {
+        disableUi(false);
+    });
+}
+
 function display() {
     disableUi(true);
 
@@ -142,8 +159,11 @@ function createCard(imgObj) {
     const imgSrc = downloadDir + '/' + imgObj.filename;
     const imgAlt = imgObj.filename;
     const imgTitle = imgObj.prompt;
+    const imgId = imgObj.filename.replace(".png", "");
 
-    let img = $("<img>").attr("src", imgSrc)
+    let img = $("<img>")
+        .attr("id", imgId)
+        .attr("src", imgSrc)
         .attr("alt", imgAlt)
         .attr("title", imgTitle)
         .data("info", imgObj)
@@ -209,7 +229,11 @@ function createCard(imgObj) {
         .addClass('btn btn-sm')
         .append('<i class="fa-solid fa-trash-can fa-fw""></i>')
         .click(function () {
-
+            const formData = new FormData();
+            for (const property in imgObj) {
+                formData.append(property, imgObj[property]);
+            }
+            delImage(formData);
         });
 
     let buttons = $("<div>").addClass('btn-group')
