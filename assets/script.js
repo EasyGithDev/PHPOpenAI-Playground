@@ -26,7 +26,7 @@ async function postData(url, formData) {
     return response.json(); // parses JSON response into native JavaScript objects
 }
 
-function downloadImg(url) {
+function downloadImage(url) {
     // Créer une balise <a> pour télécharger l'image
     var link = document.createElement("a");
     link.href = url;
@@ -45,14 +45,14 @@ function downloadImg(url) {
 function variation(formData) {
     disableUi(true);
 
-    postData("variation.php", formData).then((data) => {
+    postData("variation.php", formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
             return;
         }
 
-        data.output.forEach((val) => {
+        data.output.forEach(val => {
             let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
         });
@@ -66,14 +66,14 @@ function variation(formData) {
 function imagine(formData) {
     disableUi(true);
 
-    postData("imagine.php", formData).then((data) => {
+    postData("imagine.php", formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
             return;
         }
 
-        data.output.forEach((val) => {
+        data.output.forEach(val => {
             // console.log(val);
             let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
@@ -88,7 +88,7 @@ function imagine(formData) {
 function delImage(formData) {
     disableUi(true);
 
-    postData("delete.php", formData).then((data) => {
+    postData("delete.php", formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
@@ -105,14 +105,14 @@ function delImage(formData) {
 function display() {
     disableUi(true);
 
-    postData("display.php").then((data) => {
+    postData("display.php").then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
             return;
         }
 
-        data.output.forEach((val) => {
+        data.output.forEach(val => {
             // console.log(val);
             let thumbnail = createCard(val);
             $("#outputBox").append(thumbnail);
@@ -136,7 +136,7 @@ function displayCard(imgObj) {
     const imgSrc = downloadDir + '/' + imgObj.filename;
 
     $("#exampleModal").find("img").attr("src", imgSrc);
-    $("#exampleModalLabel").html(imgObj.prompt);
+    $("#exampleModalLabel").html(imgObj.prompt +" by "+imgObj.painter);
     $("#exampleModal").modal();
 }
 
@@ -189,19 +189,18 @@ function createCard(imgObj) {
             'height': '110px'
         });
 
-
     // download button
-    let dButton = $("<button>").attr("type", "button")
+    let donwloadButton = $("<button>").attr("type", "button")
         .attr("title", "Donwload")
         .addClass('btn btn-sm')
         .append('<i class="fa-solid fa-download fa-fw""></i>')
         .click(function () {
             inputUpdated(imgObj);
-            downloadImg(imgSrc);
+            downloadImage(imgSrc);
         });
 
     // variation button
-    let aButton = $("<button>").attr("type", "button")
+    let variationButton = $("<button>").attr("type", "button")
         .attr("title", "Variation")
         .addClass('btn btn-sm')
         .append('<i class="fa-solid fa-rotate-right fa-fw""></i>')
@@ -215,7 +214,7 @@ function createCard(imgObj) {
         });
 
     // show button
-    let sButton = $("<button>").attr("type", "button")
+    let showButton = $("<button>").attr("type", "button")
         .attr("title", "Show")
         .addClass('btn btn-sm')
         .append('<i class="fa-solid fa-eye fa-fw""></i>')
@@ -239,9 +238,9 @@ function createCard(imgObj) {
     let buttons = $("<div>").addClass('btn-group')
         .attr("role", "group")
         .append(deleteButton)
-        .append(dButton)
-        .append(aButton)
-        .append(sButton);
+        .append(donwloadButton)
+        .append(variationButton)
+        .append(showButton);
 
     img.appendTo(cardImg);
     cardImg.appendTo(card);
