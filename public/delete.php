@@ -29,11 +29,32 @@ if (empty($filename)) {
 }
 
 $image = str_replace('.png', '', $filename);
-$imageName = $config['downloadDir'] . '/' . $image . '.png';
+$imageFileName = $config['downloadDir'] . '/' . $image . '.png';
 $jsonFilename = $config['serializeDir'] . '/' . $image .'.json';
 
-unlink($imageName);
-unlink($jsonFilename);
+if(!is_writable($imageFileName)) {
+    $responseArray['error'] = 'Unable to delete image';
+    echo json_encode($responseArray);
+    die;
+}
+
+if(!is_writable($jsonFilename)) {
+    $responseArray['error'] = 'Unable to delete image';
+    echo json_encode($responseArray);
+    die;
+}
+
+if(!unlink($imageFileName)) {
+    $responseArray['error'] = 'Unable to delete image';
+    echo json_encode($responseArray);
+    die;
+}
+
+if(!unlink($jsonFilename)){
+    $responseArray['error'] = 'Unable to deleted serialized data';
+    echo json_encode($responseArray);
+    die;
+}
 
 $responseArray['success'] = true;
 $responseArray['output'] = ['image' => $image];
