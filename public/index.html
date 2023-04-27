@@ -5,7 +5,8 @@
     <meta charset="UTF-8">
     <title>PHPOpenAI Playground</title>
     <!-- Ajout des fichiers CSS de Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
         integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -19,7 +20,6 @@
         .active {
             border: 3px solid black;
         }
-        
     </style>
 </head>
 
@@ -226,6 +226,7 @@
 
 
             </div>
+
             <!-- Popup contenant l'image -->
             <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
                 aria-hidden="true">
@@ -243,6 +244,30 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Popup de Confirmation -->
+            <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog"
+                aria-labelledby="confirmationModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="confirmationModalLabel">Confirmation</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Êtes-vous sûr de vouloir effectuer cette action ?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary">Yes</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
 
     </main>
@@ -277,6 +302,23 @@
             img.css('max-height', maxHeight);
             $(this).find('.modal-dialog').css('max-width', img.width() + 30);
             $(this).find('.modal-dialog').css('max-height', img.height() + 30);
+        });
+
+        // Popup confirmation
+        $('#confirmationModal').on('show.bs.modal', function (e) {
+            var action = $(e.relatedTarget).data('action');
+            $('#confirmationModal .modal-body').text('Are you sure you want to delete this image?');
+        });
+
+        $('#confirmationModal').on('hide.bs.modal', function (e) {
+            $('#confirmationModal .modal-body').text(''); // réinitialiser le texte du corps de la pop-up lorsque la pop-up est fermée
+        });
+
+        $('#confirmationModal .modal-footer .btn-primary').click(function () {
+            var action = $(this).data('action');
+            action();
+            //   console.log('Action effectuée : ' + action);
+            $('#confirmationModal').modal('hide'); // cacher la pop-up de confirmation
         });
 
         // Lorsque le bouton de soumission est cliqué

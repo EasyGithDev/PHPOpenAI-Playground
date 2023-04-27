@@ -93,6 +93,11 @@ function imagine(formData) {
 function delImage(formData) {
     disableUi(true);
 
+
+
+
+
+
     postData(getUrl("delete.php"), formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
@@ -248,11 +253,17 @@ function createCard(imgObj) {
         .addClass('btn btn-sm')
         .append('<i class="fa-solid fa-trash-can fa-fw""></i>')
         .click(function () {
-            const formData = new FormData();
-            for (const property in imgObj) {
-                formData.append(property, imgObj[property]);
-            }
-            delImage(formData);
+
+            const action = () => {
+                const formData = new FormData();
+                for (const property in imgObj) {
+                    formData.append(property, imgObj[property]);
+                }
+                delImage(formData);
+            };
+            $('#confirmationModal .modal-footer .btn-primary').data('action', action); // stocker l'action à effectuer dans le bouton "Oui"
+            $('#confirmationModal').modal('show'); // afficher la pop-up de confirmation
+
         });
 
     let buttons = $("<div>").addClass('btn-group')
