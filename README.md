@@ -30,4 +30,19 @@ git clone git@github.com:EasyGithDev/PHPOpenAI-Playground.git
 composer install
 ```
 
+#### Run the project
 
+First, you need to go in the directory install.
+Next, you need to move in the public directory.
+Finally, launch the server :
+
+```bash
+cd /[INSTALL DIR]/public
+php -S localhost:8000
+```
+
+You can open the playround in your browser.
+
+```
+http://localhost:8000
+```
