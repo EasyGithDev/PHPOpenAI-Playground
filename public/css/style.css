@@ -1,0 +1,7 @@
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.active {
+    border: 3px solid black;
+}
