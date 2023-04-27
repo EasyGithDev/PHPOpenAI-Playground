@@ -8,6 +8,11 @@
 
 const downloadDir = '../download';
 
+const getUrl = resource => {
+    let url = new URL(window.location.href)
+    return url.protocol + "//" + url.host + "/" + resource;
+}
+
 async function postData(url, formData) {
     // Default options are marked with *
     const response = await fetch(url, {
@@ -30,7 +35,7 @@ function downloadImage(url) {
     // Créer une balise <a> pour télécharger l'image
     var link = document.createElement("a");
     link.href = url;
-    link.download = url.split("/").pop();
+    link.download = url.split("=").pop();
 
     // Ajouter la balise <a> au DOM
     document.body.appendChild(link);
@@ -45,7 +50,7 @@ function downloadImage(url) {
 function variation(formData) {
     disableUi(true);
 
-    postData("variation.php", formData).then(data => {
+    postData(getUrl("variation.php"), formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
@@ -66,7 +71,7 @@ function variation(formData) {
 function imagine(formData) {
     disableUi(true);
 
-    postData("imagine.php", formData).then(data => {
+    postData(getUrl("imagine.php"), formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
@@ -88,7 +93,24 @@ function imagine(formData) {
 function delImage(formData) {
     disableUi(true);
 
-    postData("delete.php", formData).then(data => {
+    postData(getUrl("delete.php"), formData).then(data => {
+        // console.log(data); // JSON data parsed by `data.json()` call
+        if (!data.success) {
+            alert(data.error);
+            return;
+        }
+        $("#" + data.output.image).parent().parent().remove();
+    }).catch(error => {
+        console.error(error);
+    }).finally(() => {
+        disableUi(false);
+    });
+}
+
+function showImage(filename) {
+    disableUi(true);
+
+    postData(getUrl("show.php?filename=" + filename)).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
@@ -104,8 +126,8 @@ function delImage(formData) {
 
 function display() {
     disableUi(true);
-
-    postData("display.php").then(data => {
+    console.log(getUrl("display.php"))
+    postData(getUrl("display.php")).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
             alert(data.error);
@@ -133,10 +155,8 @@ function disableUi(val) {
 }
 
 function displayCard(imgObj) {
-    const imgSrc = downloadDir + '/' + imgObj.filename;
-
-    $("#exampleModal").find("img").attr("src", imgSrc);
-    $("#exampleModalLabel").html(imgObj.prompt +" by "+imgObj.painter);
+    $("#exampleModal").find("img").attr("src", getUrl("show.php") + "?filename=" + imgObj.filename);
+    $("#exampleModalLabel").html("&#x22;" + imgObj.prompt + "&#x22; by " + imgObj.painter);
     $("#exampleModal").modal();
 }
 
@@ -163,7 +183,7 @@ function createCard(imgObj) {
 
     let img = $("<img>")
         .attr("id", imgId)
-        .attr("src", imgSrc)
+        .attr("src", getUrl("show.php") + "?filename=" + imgSrc)
         .attr("alt", imgAlt)
         .attr("title", imgTitle)
         .data("info", imgObj)
@@ -196,7 +216,7 @@ function createCard(imgObj) {
         .append('<i class="fa-solid fa-download fa-fw""></i>')
         .click(function () {
             inputUpdated(imgObj);
-            downloadImage(imgSrc);
+            downloadImage(getUrl("show.php") + "?filename=" + imgObj.filename);
         });
 
     // variation button
