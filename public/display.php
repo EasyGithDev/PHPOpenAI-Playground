@@ -21,14 +21,31 @@ $responseArray = [
 
 require __DIR__ . '/../classes/ImageSerializer.php';
 $images = [];
+$files = [];
+$mtimes = [];
+$dir = new DirectoryIterator($config['serializeDir']);
 
-foreach (new DirectoryIterator($config['downloadDir']) as $file) {
-    if ($file->getExtension() == 'png') {
-        $jsonFilename = $config['serializeDir'] . '/' . str_replace('.png', '.json', $file->getFilename());
-        $infos = ImageSerializer::load($jsonFilename);
-        if ($infos) {
-            $images[] = $infos;
-        }
+foreach ($dir as $file) {
+    if (!$file->isFile() or $file->getExtension() != 'json')
+        continue;
+
+    $mtime = $file->getMTime();
+
+    if (!isset($mtimes[$mtime])) {
+        $files[$mtime . '.0'] = $file->getFilename();
+        $mtimes[$mtime] = 1;
+    } else {
+        $files[$mtime . '.' . $mtimes[$mtime]++] = $file->getFilename();
+    }
+}
+
+ksort($files);
+
+foreach ($files as $filename) {
+    $jsonFilename = $config['serializeDir'] . '/' . $filename;
+    $infos = ImageSerializer::load($jsonFilename);
+    if ($infos) {
+        $images[] = $infos;
     }
 }
 
