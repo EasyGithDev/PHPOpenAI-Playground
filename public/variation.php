@@ -19,6 +19,7 @@ use EasyGithDev\PHPOpenAI\OpenAIClient;
 
 $config = require __DIR__ . '/../config/conf.php';
 require __DIR__ . '/../classes/ImageSerializer.php';
+require __DIR__ . '/../classes/ImageIO.php';
 
 $responseArray = [
     'success' => false,
@@ -74,7 +75,9 @@ try {
 
         $input['filename'] =  $imgFilename;
 
-        file_put_contents($config['downloadDir'] . '/' . $imgFilename, base64_decode($image->b64_json));
+        if (!ImageIO::write($config['downloadDir'] . '/' . $imgFilename, $image->b64_json))
+            throw new Exception("Image write fail");
+
         if (!ImageSerializer::write($config['serializeDir'] . '/' . $jsonFilename, $input))
             throw new Exception("Serialize fail");
 

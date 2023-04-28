@@ -93,11 +93,6 @@ function imagine(formData) {
 function delImage(formData) {
     disableUi(true);
 
-
-
-
-
-
     postData(getUrl("delete.php"), formData).then(data => {
         // console.log(data); // JSON data parsed by `data.json()` call
         if (!data.success) {
@@ -181,7 +176,7 @@ function imageActivated(img) {
 
 function createCard(imgObj) {
 
-    const imgSrc = downloadDir + '/' + imgObj.filename;
+    const imgSrc = imgObj.filename;
     const imgAlt = imgObj.filename;
     const imgTitle = imgObj.prompt + ' by ' + imgObj.painter;
     const imgId = imgObj.filename.replace(".png", "");

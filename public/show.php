@@ -20,6 +20,6 @@ if (empty($filename)) {
     // dump the picture and stop the script
     fpassthru($fp);
 } else {
-    $image = $config['downloadDir'] . '/' . $_GET['filename'];
+    $image = $config['downloadDir'] . '/' . $filename;
     readfile($image);
 }
