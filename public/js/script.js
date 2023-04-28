@@ -10,7 +10,7 @@ const downloadDir = '../download';
 
 const getUrl = resource => {
     let url = new URL(window.location.href)
-    return url.protocol + "//" + url.host + "/" + resource;
+    return url.protocol + "//" + url.host + "/" + url.pathname + resource;
 }
 
 async function postData(url, formData) {
