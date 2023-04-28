@@ -68,6 +68,7 @@ $images = [];
 try {
     $response = (new OpenAIClient($apiKey))
         ->Image()
+        ->addCurlParam('timeout', $config['timeout'])
         ->create(
             $prompt,
             n: $inumber,

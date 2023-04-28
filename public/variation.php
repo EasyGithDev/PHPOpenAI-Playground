@@ -57,6 +57,7 @@ try {
 
     $response = (new OpenAIClient($apiKey))
         ->Image()
+        ->addCurlParam('timeout', $config['timeout'])
         ->createVariation(
             $image,
             n: $inumber,

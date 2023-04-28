@@ -183,7 +183,7 @@ function createCard(imgObj) {
 
     const imgSrc = downloadDir + '/' + imgObj.filename;
     const imgAlt = imgObj.filename;
-    const imgTitle = imgObj.prompt;
+    const imgTitle = imgObj.prompt + ' by ' + imgObj.painter;
     const imgId = imgObj.filename.replace(".png", "");
 
     let img = $("<img>")
@@ -201,6 +201,7 @@ function createCard(imgObj) {
         .click(function (e) {
             imageActivated($(e.target));
             inputUpdated(imgObj);
+            displayCard(imgObj);
         });
 
     let card = $("<div>").addClass("border text-center float-left")
@@ -270,8 +271,8 @@ function createCard(imgObj) {
         .attr("role", "group")
         .append(deleteButton)
         .append(donwloadButton)
-        .append(variationButton)
-        .append(showButton);
+        .append(variationButton);
+    // .append(showButton);
 
     img.appendTo(cardImg);
     cardImg.appendTo(card);
