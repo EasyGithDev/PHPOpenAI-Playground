@@ -46,3 +46,7 @@ You can open the playround in your browser.
 ```
 http://localhost:8000
 ```
+
+#### Important
+
+The application stores images and associated metadata in the "download" and "serialize" folders. These two folders must be writable.
