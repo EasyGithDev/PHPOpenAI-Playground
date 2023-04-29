@@ -32,16 +32,19 @@ composer install
 
 #### Run the project
 
-First, you need to go in the directory install.
-Next, you need to move in the public directory.
-Finally, launch the server :
+First, you need to go in the public directory :
 
 ```bash
-cd /[INSTALL DIR]/public
+cd /INSTALL/DIR/public
+```
+
+Next, launch the server :
+
+```bash
 php -S localhost:8000
 ```
 
-You can open the playround in your browser.
+Finally, you can open the playround in your browser :
 
 ```
 http://localhost:8000
