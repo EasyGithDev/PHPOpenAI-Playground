@@ -68,16 +68,28 @@ if ($debug) {
 $apiKey = $config['apiKey'];
 $images = [];
 try {
-    $response = (new OpenAIClient($apiKey))
+    $obj = (new OpenAIClient($apiKey))
         ->Image()
-        ->addCurlParam('timeout', $config['timeout'])
-        ->create(
+        ->addCurlParam('timeout', $config['timeout']);
+        
+    if ($config['dalleVersion'] == 3) {
+        $obj = $obj->createWithDalle3(
+            $prompt,
+            n: 1,
+            size: ImageSizeEnum::is1024,
+            response_format: $rformat
+        );
+    }
+    else {
+        $obj = $obj->createWithDalle2(
             $prompt,
             n: $inumber,
             size: $isize,
             response_format: $rformat
-        )
-        ->toObject();
+        );
+    }   
+
+    $response = $obj->toObject();
 
     foreach ($response->data as $image) {
 
